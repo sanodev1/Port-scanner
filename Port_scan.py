@@ -21,7 +21,7 @@ class clr:
      RESET   = '\033[0;0;0m'
      BOLD    = '\033[1m'
 
-arte_ascii = f"""\n       
+arte_ascii = f"""       
  {clr.BOLD}{clr.GREEN}
     Port Scanner
      ⢀⣠⣤⣶⣶⣿⣿⣿⣶⣶⣤⡀
