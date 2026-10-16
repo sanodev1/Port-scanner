@@ -9,22 +9,10 @@ import argparse
 
 from pythonping import ping
 
-class clr:
-     BLACK   = '\033[30m'
-     RED     = '\033[31m'
-     GREEN   = '\033[32m'
-     YELLOW  = '\033[33m'
-     BLUE    = '\033[34m'
-     MAGENTA = '\033[35m'
-     CYAN    = '\033[36m'
-     WHITE   = '\033[37m'
-     RESET   = '\033[0;0;0m'
-     BOLD    = '\033[1m'
 
-arte_ascii = f"""       
- {clr.BOLD}{clr.GREEN}
-    Port Scanner
-     ⢀⣠⣤⣶⣶⣿⣿⣿⣶⣶⣤⡀
+arte_ascii = f"""\n        
+        Port Scanner
+        ⢀⣠⣤⣶⣶⣿⣿⣿⣶⣶⣤⡀
 ⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀⠀⠀
 ⠀⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀
 ⠀⠀⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀
@@ -36,39 +24,48 @@ arte_ascii = f"""
 ⠀⠀⠀⠀⠀⠈⠀⠘⢉⠖⠠⠤⠤⠀⠈⡌⣿⡏⠀⠀⠀
 ⠀⠀⠀⠀⠀⢀⡠⠔⠊⠀⠀⠀⠀⠀⠀⠈⣿⡀⠀⠀⠀
 ⠀⡠⠂⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠈⠁⠂⢄
-⢰⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣆⠀⠀ ⠈
-{clr.RESET} 
-{clr.BOLD}{clr.CYAN}              By Sanosec{clr.RESET}"""
+⢰⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣆⠀⠀ ⠈ 
+             By Sanosec"""
 
 
-
+class clr:
+    BLACK   = '\033[30m'
+    RED     = '\033[31m'
+    GREEN   = '\033[32m'
+    YELLOW  = '\033[33m'
+    BLUE    = '\033[34m'
+    MAGENTA = '\033[35m'
+    CYAN    = '\033[36m'
+    WHITE   = '\033[37m'
+    RESET   = '\033[0;0;0m'
+    BOLD    = '\033[1m'
 
 def parse_args() -> argparse.Namespace:
-     parser = argparse.ArgumentParser(
-          description=f"{clr.RED}Rapido e indiscreto Scanner de portas por Sano :P{clr.RESET}"
-     )
-     parser.add_argument('-t','--target', dest='host', required=True,
-                         help='Target IP or domain')
-     parser.add_argument('--timeout', dest='timeout', type=int, default=None,
-                         help='Timeout em milisegundos por porta (default: auto via ping)')
-     parser.add_argument('--threads', dest='threads', type=int, default=30, 
-                         help='Numero de threads para utilizar (default: 30 threads)')
-     parser.add_argument('-o', '--output', dest='output', default=None,
-                         help='Arquivo que conterá as portas escaneadas (default: not save)')
-     parser.add_argument('--more', dest='top10k', action='store_true',
-                         help='Escanear top 10 mil portas em vez de top 1000')
-     return parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description=f"{clr.RED}Rapido e indiscreto Scanner de portas por Sano :P{clr.RESET}"
+    )
+    parser.add_argument('-t','--target', dest='host', required=True,
+                        help='Target IP or domain')
+    parser.add_argument('--timeout', dest='timeout', type=float, default=None,
+                        help='Timeout em milisegundos por porta (default: auto via ping)')
+    parser.add_argument('--threads', dest='threads', type=int, default=30, 
+                        help='Numero de threads para utilizar (default: 30 threads)')
+    parser.add_argument('-o', '--output', dest='output', default=None,
+                        help='Arquivo que conterá as portas escaneadas (default: not save)')
+    parser.add_argument('--more', dest='top10k', action='store_true',
+                        help='Escanear top 10 mil portas em vez de top 1000')
+    return parser.parse_args()
 
 def get_timeout(host: str) -> float:
-     try:
-          result = ping(target=host, count=2, timeout=5)
-          return float(result.rtt_avg_ms) + 80
-     except KeyboardInterrupt:
-          print(f"\n{clr.RED}[!]{clr.RESET} Operação cancelada pelo usuário\n")
-          sys.exit(0)
-     except Exception as e:
-          print(f"\n{clr.RED}[!] FATAL-ERROR: {clr.RESET} {e}\n")
-          sys.exit(1)
+    try:
+        result = ping(target=host, count=2, timeout=5)
+        return float(result.rtt_avg_ms) + 80
+    except KeyboardInterrupt:
+        print(f"\n{clr.RED}[!]{clr.RESET} Operação cancelada pelo usuário\n")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n{clr.RED}[!] FATAL-ERROR: {clr.RESET} {e}\n")
+        sys.exit(1)
 
 
 class PortScanner:
@@ -115,9 +112,10 @@ class PortScanner:
         return sorted(self.open_ports)
     
     def _worker(self):
-        while not self.stop_event().is_set():
+        # CORRIGIDO: Removido os parênteses de self.stop_event e corrigido self.port_quere para self.port_queue
+        while not self.stop_event.is_set():
             try:
-                port = self.port_quere.get_nowait()
+                port = self.port_queue.get_nowait()
             except queue.Empty:
                 break
             self._probe(port)
@@ -165,7 +163,7 @@ def main():
     timeout_ms = args.timeout if args.timeout else get_timeout(args.host)
 
     print(f'Domain = {clr.MAGENTA}{args.host}{clr.RESET}')
-    print(f'Timeout = {clr.MAGENTA}{args.timeout}{clr.RESET} ms')
+    print(f'Timeout = {clr.MAGENTA}{timeout_ms:.2f}{clr.RESET} ms')
     print(f'Threads = {clr.MAGENTA}{args.threads}{clr.RESET}')
     print(f'\n{clr.YELLOW} [  Resultados  ]{clr.RESET}')
 
@@ -190,4 +188,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
